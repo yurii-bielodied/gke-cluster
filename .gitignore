@@ -13,3 +13,9 @@
 # Vars files
 *.tfvars
 *.tfvars.json
+
+# Kind cluster files
+kind-cluster-config
+
+# GKE cluster kubeconfig
+kubeconfig

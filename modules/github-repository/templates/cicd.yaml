@@ -1,0 +1,60 @@
+name: push-artifact
+
+on:
+  push:
+    branches:
+      - 'main'
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  OCI_REPO: "oci://ghcr.io/yurii-bielodied/${{ github.event.repository.name }}"
+
+jobs:
+  kubernetes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      # ✅ Validate Kubernetes manifests with kubeval
+      - name: Validate manifests with kubeconform
+        run: |
+          curl -L https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz \
+            | tar xz
+          ./kubeconform -strict -ignore-missing-schemas -summary ./clusters/**/*.yaml
+      # ✅ Get next version using reecetech/version-increment
+      - name: Get next version
+        id: version
+        uses: reecetech/version-increment@2024.10.1
+        with:
+          scheme: semver
+          increment: patch   # or minor/major
+      # ✅ Create and push tag
+      - name: Create and push tag
+        run: |
+          git config user.name "git"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ steps.version.outputs.version }}
+          git push origin ${{ steps.version.outputs.version }}
+      # ✅ Setup Flux CLI
+      - name: Setup Flux CLI
+        uses: fluxcd/flux2/action@main
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+       # ✅ Push Flux OCI
+      - name: Push manifests
+        run: |
+          flux push artifact $OCI_REPO:${{ steps.version.outputs.version }}-$(git rev-parse --short HEAD) \
+            --path="./clusters/flux" \
+            --source="$(git config --get remote.origin.url)" \
+            --revision="$(git branch --show-current)@sha1:$(git rev-parse HEAD)"
+        # ✅ Tag Flux OCI
+      - name: Deploy manifests to staging
+        run: |
+          flux tag artifact $OCI_REPO:${{ steps.version.outputs.version }}-$(git rev-parse --short HEAD) --tag dev-${{ steps.version.outputs.version }}-$(git rev-parse --short HEAD)
