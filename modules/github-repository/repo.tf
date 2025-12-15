@@ -16,6 +16,12 @@ resource "github_repository_deploy_key" "repo" {
   read_only  = false
 }
 
+resource "github_actions_secret" "ghcr_pat" {
+  repository      = github_repository.repo.name
+  secret_name     = "REPO_TOKEN"
+  plaintext_value = var.github_token
+}
+
 resource "github_repository_file" "cicd_workflow" {
   repository          = github_repository.repo.name
   branch              = "main"
