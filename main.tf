@@ -32,8 +32,8 @@ module "flux_bootstrap" {
   github_repository = "${var.GITHUB_OWNER}/${var.FLUX_GITHUB_REPO}" # (Required) The name of the Git repository to be created
   private_key       = module.tls_private_key.private_key_pem        # (Optional) The SSH private key to use for Git operations
   github_token      = var.GITHUB_TOKEN
-  # config_path       = module.gke_cluster.kubeconfig # (Optional) The path to the Kubernetes configuration file. Default value is ~/.kube/config
-  config_path = "${path.root}/kind-cluster-config"
+  config_path       = module.gke_cluster.kubeconfig # The path to the Kubernetes configuration file. Default value is ~/.kube/config
+  # config_path = "${path.root}/kind-cluster-config"
 }
 
 provider "kubernetes" {
@@ -41,14 +41,14 @@ provider "kubernetes" {
   # config_path = "${path.root}/kind-cluster-config"
 }
 
-resource "kubernetes_secret_v1" "kbot" {
-  depends_on = [module.flux_bootstrap]
+# resource "kubernetes_secret_v1" "kbot" {
+#   depends_on = [module.flux_bootstrap]
 
-  metadata {
-    name      = "kbot"
-    namespace = "kbot"
-  }
-  data = {
-    token = var.TELE_TOKEN
-  }
-}
+#   metadata {
+#     name      = "kbot"
+#     namespace = "kbot"
+#   }
+#   data = {
+#     token = var.TELE_TOKEN
+#   }
+# }
