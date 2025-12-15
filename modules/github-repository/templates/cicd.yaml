@@ -10,7 +10,7 @@ permissions:
   packages: write
 
 env:
-  OCI_REPO: "oci://ghcr.io/yurii-bielodied/${{ github.event.repository.name }}"
+  OCI_REPO: "ghcr.io/yurii-bielodied/${{ github.event.repository.name }}"
 
 jobs:
   kubernetes:

@@ -1,15 +1,15 @@
 
-module "gke_cluster" {
-  source           = "./modules/google-gke-cluster"
-  GOOGLE_REGION    = var.GOOGLE_REGION
-  GOOGLE_PROJECT   = var.GOOGLE_PROJECT
-  GKE_NUM_NODES    = var.GKE_NUM_NODES
-  GKE_MACHINE_TYPE = var.GKE_MACHINE_TYPE
-}
-
-# module "kind_cluster" {
-#   source = "./modules/kind-cluster"
+# module "gke_cluster" {
+#   source           = "./modules/google-gke-cluster"
+#   GOOGLE_REGION    = var.GOOGLE_REGION
+#   GOOGLE_PROJECT   = var.GOOGLE_PROJECT
+#   GKE_NUM_NODES    = var.GKE_NUM_NODES
+#   GKE_MACHINE_TYPE = var.GKE_MACHINE_TYPE
 # }
+
+module "kind_cluster" {
+  source = "./modules/kind-cluster"
+}
 
 module "tls_private_key" {
   source = "github.com/den-vasyliev/tf-hashicorp-tls-keys"
@@ -32,13 +32,13 @@ module "flux_bootstrap" {
   github_repository = "${var.GITHUB_OWNER}/${var.FLUX_GITHUB_REPO}" # (Required) The name of the Git repository to be created
   private_key       = module.tls_private_key.private_key_pem        # (Optional) The SSH private key to use for Git operations
   github_token      = var.GITHUB_TOKEN
-  config_path       = module.gke_cluster.kubeconfig # (Optional) The path to the Kubernetes configuration file. Default value is ~/.kube/config
-  # config_path = "${path.root}/kind-cluster-config"
+  # config_path       = module.gke_cluster.kubeconfig # (Optional) The path to the Kubernetes configuration file. Default value is ~/.kube/config
+  config_path = "${path.root}/kind-cluster-config"
 }
 
 provider "kubernetes" {
-  config_path = module.gke_cluster.kubeconfig
-  # config_path = "${path.root}/kind-cluster-config"
+  # config_path = module.gke_cluster.kubeconfig
+  config_path = "${path.root}/kind-cluster-config"
 }
 
 resource "kubernetes_secret_v1" "kbot" {
