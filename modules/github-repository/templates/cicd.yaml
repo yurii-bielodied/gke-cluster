@@ -10,7 +10,7 @@ permissions:
   packages: write
 
 env:
-  OCI_REPO: "ghcr.io/yurii-bielodied/${{ github.event.repository.name }}"
+  OCI_REPO: "oci://ghcr.io/yurii-bielodied/${{ github.event.repository.name }}"
 
 jobs:
   kubernetes:
@@ -41,12 +41,13 @@ jobs:
       # ✅ Setup Flux CLI
       - name: Setup Flux CLI
         uses: fluxcd/flux2/action@main
+      # Login to GHCR
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.REPO_TOKEN }}
        # ✅ Push Flux OCI
       - name: Push manifests
         run: |
