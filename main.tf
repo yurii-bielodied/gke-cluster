@@ -1,15 +1,15 @@
 
-# module "gke_cluster" {
-#   source           = "./modules/google-gke-cluster"
-#   GOOGLE_REGION    = var.GOOGLE_REGION
-#   GOOGLE_PROJECT   = var.GOOGLE_PROJECT
-#   GKE_NUM_NODES    = var.GKE_NUM_NODES
-#   GKE_MACHINE_TYPE = var.GKE_MACHINE_TYPE
-# }
-
-module "kind_cluster" {
-  source = "./modules/kind-cluster"
+module "gke_cluster" {
+  source           = "./modules/google-gke-cluster"
+  GOOGLE_REGION    = var.GOOGLE_REGION
+  GOOGLE_PROJECT   = var.GOOGLE_PROJECT
+  GKE_NUM_NODES    = var.GKE_NUM_NODES
+  GKE_MACHINE_TYPE = var.GKE_MACHINE_TYPE
 }
+
+# module "kind_cluster" {
+#   source = "./modules/kind-cluster"
+# }
 
 module "tls_private_key" {
   source = "github.com/den-vasyliev/tf-hashicorp-tls-keys"
@@ -37,8 +37,8 @@ module "flux_bootstrap" {
 }
 
 provider "kubernetes" {
-  # config_path = module.gke_cluster.kubeconfig
-  config_path = "${path.root}/kind-cluster-config"
+  config_path = module.gke_cluster.kubeconfig
+  # config_path = "${path.root}/kind-cluster-config"
 }
 
 resource "kubernetes_secret_v1" "kbot" {
